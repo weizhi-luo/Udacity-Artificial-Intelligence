@@ -44,8 +44,30 @@ def naked_twins(values):
     and because it is simpler (since the reduce_puzzle function already calls this
     strategy repeatedly).
     """
-    # TODO: Implement this function!
-    raise NotImplementedError
+    for unit in unitlist:
+        two_values = [values[box] for box in unit if len(values[box]) == 2]
+        if not two_values:
+            continue
+        if any([value for value in two_values if two_values.count(value) > 2]):
+            return False
+        
+        twin_values = set(value for value in two_values if two_values.count(value) == 2)
+        if not twin_values:
+            continue
+        twin_values_digits = ''.join(twin_values)
+        if any([digit for digit in twin_values_digits if twin_values_digits.count(digit) > 1]):
+            return False
+        
+        for value in twin_values:
+            for box in unit:
+                if value == values[box]:
+                    continue
+                if value[0] in values[box]:
+                    values[box] = values[box].replace(value[0], '')
+                if value[1] in values[box]:
+                    values[box] = values[box].replace(value[1], '')
+                    
+    return values
 
 
 def eliminate(values):
@@ -156,6 +178,9 @@ def search(values):
     """
     # First, reduce the puzzle using the previous function
     if not reduce_puzzle(values):
+        return False
+    
+    if not naked_twins(values):
         return False
     
     # Choose one of the unfilled squares with the fewest possibilities
