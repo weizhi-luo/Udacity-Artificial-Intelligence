@@ -63,8 +63,13 @@ def eliminate(values):
     dict
         The values dictionary with the assigned values eliminated from peers
     """
-    # TODO: Copy your code from the classroom to complete this function
-    raise NotImplementedError
+    solved_boxes = [key for key, value in values.items() if len(value) == 1]
+    for solved_box in solved_boxes:
+        solved_value = values[solved_box]
+        for peer_box in peers[solved_box]:
+            values[peer_box] = values[peer_box].replace(solved_value, '')
+
+    return values
 
 
 def only_choice(values):
@@ -87,8 +92,27 @@ def only_choice(values):
     -----
     You should be able to complete this function by copying your code from the classroom
     """
-    # TODO: Copy your code from the classroom to complete this function
-    raise NotImplementedError
+    unsolved_boxes = [key for key, value in values.items() if len(value) > 1]
+    
+    for unsolved_box in unsolved_boxes:
+        solved = False
+        
+        row_peers = [box for box in units[unsolved_box][0] if box != unsolved_box]
+        column_peers = [box for box in units[unsolved_box][1] if box != unsolved_box]
+        square_peers = [box for box in units[unsolved_box][2] if box != unsolved_box]
+        
+        for peers in [row_peers, column_peers, square_peers]:
+            unsolved_box_peer_values = ''.join(values[peer] for peer in peers)
+            for value in values[unsolved_box]:
+                if value not in unsolved_box_peer_values:
+                    values[unsolved_box] = value
+                    solved = True
+                    break
+                
+            if solved:
+                break
+    
+    return values
 
 
 def reduce_puzzle(values):
@@ -105,8 +129,23 @@ def reduce_puzzle(values):
         The values dictionary after continued application of the constraint strategies
         no longer produces any changes, or False if the puzzle is unsolvable 
     """
-    # TODO: Copy your code from the classroom and modify it to complete this function
-    raise NotImplementedError
+    stalled = False
+    while not stalled:
+        # Check how many boxes have a determined value
+        solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
+
+        # Your code here: Use the Eliminate Strategy
+        values = eliminate(values)
+        # Your code here: Use the Only Choice Strategy
+        values = only_choice(values)
+        # Check how many boxes have a determined value, to compare
+        solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
+        # If no new values were added, stop the loop.
+        stalled = solved_values_before == solved_values_after
+        # Sanity check, return False if there is a box with zero available values:
+        if len([box for box in values.keys() if len(values[box]) == 0]):
+            return False
+    return values
 
 
 def search(values):
@@ -128,8 +167,25 @@ def search(values):
     You should be able to complete this function by copying your code from the classroom
     and extending it to call the naked twins strategy.
     """
-    # TODO: Copy your code from the classroom to complete this function
-    raise NotImplementedError
+    # First, reduce the puzzle using the previous function
+    if not reduce_puzzle(values):
+        return False
+    
+    # Choose one of the unfilled squares with the fewest possibilities
+    unsolved_boxes = [key for key, value in values.items() if len(value) > 1]
+    if not unsolved_boxes:
+        return values
+    
+    length, unsolved_box = min((len(values[unsolved_box]), unsolved_box) for unsolved_box in unsolved_boxes)
+    
+    # Now use recursion to solve each one of the resulting sudokus, and if one returns a value (not False), return that answer!
+    #for unsolved_box in unsolved_boxes:
+    for value in values[unsolved_box]:
+        values_copy = values.copy()
+        values_copy[unsolved_box] = value
+        values_result = search(values_copy)
+        if values_result:
+            return values_result
 
 
 def solve(grid):
