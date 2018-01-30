@@ -8,7 +8,8 @@ square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','45
 unitlist = row_units + column_units + square_units
 
 # TODO: Update the unit list to add the new diagonal units
-unitlist = unitlist
+diagonal_units = [[r+c for r, c in zip(rows, cols)], [r+c for r, c in zip(rows, cols[::-1])]]
+unitlist = unitlist + diagonal_units
 
 
 # Must be called after all units (including diagonals) are added to the unitlist
@@ -92,26 +93,12 @@ def only_choice(values):
     -----
     You should be able to complete this function by copying your code from the classroom
     """
-    unsolved_boxes = [key for key, value in values.items() if len(value) > 1]
-    
-    for unsolved_box in unsolved_boxes:
-        solved = False
-        
-        row_peers = [box for box in units[unsolved_box][0] if box != unsolved_box]
-        column_peers = [box for box in units[unsolved_box][1] if box != unsolved_box]
-        square_peers = [box for box in units[unsolved_box][2] if box != unsolved_box]
-        
-        for peers in [row_peers, column_peers, square_peers]:
-            unsolved_box_peer_values = ''.join(values[peer] for peer in peers)
-            for value in values[unsolved_box]:
-                if value not in unsolved_box_peer_values:
-                    values[unsolved_box] = value
-                    solved = True
-                    break
+    for unit in unitlist:
+        for digit in '123456789':
+            digit_boxes = [box for box in unit if digit in values[box]]
+            if len(digit_boxes) == 1:
+                values[digit_boxes[0]] = digit
                 
-            if solved:
-                break
-    
     return values
 
 
