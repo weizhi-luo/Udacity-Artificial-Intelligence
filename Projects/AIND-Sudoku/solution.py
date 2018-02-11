@@ -63,9 +63,11 @@ def naked_twins(values):
                 if value == values[box]:
                     continue
                 if value[0] in values[box]:
-                    values[box] = values[box].replace(value[0], '')
+                    assign_value(values, box, values[box].replace(value[0], ''))
+                    #values[box] = values[box].replace(value[0], '')
                 if value[1] in values[box]:
-                    values[box] = values[box].replace(value[1], '')
+                    assign_value(values, box, values[box].replace(value[1], ''))
+                    #values[box] = values[box].replace(value[1], '')
                     
     return values
 
@@ -90,7 +92,8 @@ def eliminate(values):
     for solved_box in solved_boxes:
         solved_value = values[solved_box]
         for peer_box in peers[solved_box]:
-            values[peer_box] = values[peer_box].replace(solved_value, '')
+            assign_value(values, peer_box, values[peer_box].replace(solved_value, ''))
+            #values[peer_box] = values[peer_box].replace(solved_value, '')
 
     return values
 
@@ -119,7 +122,8 @@ def only_choice(values):
         for digit in '123456789':
             digit_boxes = [box for box in unit if digit in values[box]]
             if len(digit_boxes) == 1:
-                values[digit_boxes[0]] = digit
+                assign_value(values, digit_boxes[0], digit)
+                #values[digit_boxes[0]] = digit
                 
     return values
 
