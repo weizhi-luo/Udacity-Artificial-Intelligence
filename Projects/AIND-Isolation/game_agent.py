@@ -225,9 +225,8 @@ class MinimaxPlayer(IsolationPlayer):
         # TODO: finish this function!
         best_score = float("-inf")
         best_move = (-1, -1)
-        maximizing_player = game.active_player
         for m in game.get_legal_moves():
-            v = self.min_value(game.forecast_move(m), depth - 1, maximizing_player)
+            v = self.min_value(game.forecast_move(m), depth - 1, self)
             if v > best_score:
                 best_score = v
                 best_move = m
@@ -367,9 +366,8 @@ class AlphaBetaPlayer(IsolationPlayer):
         # TODO: finish this function!
         best_score = float("-inf")
         best_move = (-1, -1)
-        maximizing_player = game.active_player
         for m in game.get_legal_moves():
-            v = self.min_value(game.forecast_move(m), depth - 1, maximizing_player, alpha, beta)
+            v = self.min_value(game.forecast_move(m), depth - 1, self, alpha, beta)
             if v > best_score:
                 best_score = v
                 best_move = m
