@@ -79,10 +79,14 @@ def custom_score_2(game, player):
 
     if game.is_winner(player):
         return float("inf")
-
+    
+    y1, x1 = game.get_player_location(player)
+    y2, x2 = game.get_player_location(game.get_opponent(player))
+    y2_mirror, x2_mirror = game.height - y2 - 1, game.width - x2 - 1
+    distance = math.sqrt((y2_mirror - y1)**2 + (x2_mirror - x1)**2)
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - 2 * opp_moves)
+    return float(own_moves - distance - opp_moves)
 
 
 def custom_score_3(game, player):
