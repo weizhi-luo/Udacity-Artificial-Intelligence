@@ -155,17 +155,18 @@ class IsolationPlayer:
         self.score = score_fn
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
-        # Transposition table
-        # Key is a game object (hashed)
-        # Value is a tuple. First item is the depth, second item is the score
-        self.transposition_table = {}
-
+        
 
 class MinimaxPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using depth-limited minimax
     search. You must finish and test this player to make sure it properly uses
     minimax to return a good move before the search time limit expires.
     """
+    
+    # Transposition table
+    # Key is a game object (hashed)
+    # Value is a tuple. First item is the depth, second item is the score
+    transposition_table = {}
 
     def get_move(self, game, time_left):
         """Search for the best move from the available legal moves and return a
@@ -367,9 +368,6 @@ class AlphaBetaPlayer(IsolationPlayer):
         # TODO: finish this function!
         best_move = (-1, -1)
         
-        # Initialize the transposition table in every move
-        self.transposition_table.clear()
-
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
