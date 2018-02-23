@@ -162,12 +162,6 @@ class MinimaxPlayer(IsolationPlayer):
     search. You must finish and test this player to make sure it properly uses
     minimax to return a good move before the search time limit expires.
     """
-    
-    # Transposition table
-    # Key is a game object (hashed)
-    # Value is a tuple. First item is the depth, second item is the score
-    transposition_table = {}
-
     def get_move(self, game, time_left):
         """Search for the best move from the available legal moves and return a
         result before the time limit expires.
@@ -202,9 +196,6 @@ class MinimaxPlayer(IsolationPlayer):
         # in case the search fails due to timeout
         best_move = (-1, -1)
         
-        # Initialize the transposition table in every move
-        self.transposition_table.clear()
-
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
@@ -272,38 +263,18 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
         
-        # Try to get value from transposition table
-        # Value is a tuple. First item is the depth, second item is the score
-        stored_v = self.transposition_table.get(game.hash())
-        if stored_v and stored_v[0] >= depth:
-            return stored_v[1]
-        
         if depth == 0 or self.terminal_state(game):
             return self.score(game, player)
         
         v = float("inf")
         for m in game.get_legal_moves():
             v = min(v, self.max_value(game.forecast_move(m), depth - 1, player))
-        
-        # If the transposition table contains this entry,
-        # update the value only when current depth is greater than
-        # the existing one stored.
-        # If the transposition table does not contain this entry,
-        # add this entry and value
-        if (stored_v and stored_v[0] < depth) or (not stored_v):
-            self.transposition_table[game.hash()] = (depth, v)
-            
+                    
         return v
     
     def max_value(self, game, depth, player):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-            
-        # Try to get value from transposition table
-        # Value is a tuple. First item is the depth, second item is the score
-        stored_v = self.transposition_table.get(game.hash())
-        if stored_v and stored_v[0] >= depth:
-            return stored_v[1]
             
         if depth == 0 or self.terminal_state(game):
             return self.score(game, player)
@@ -311,14 +282,6 @@ class MinimaxPlayer(IsolationPlayer):
         v = float("-inf")
         for m in game.get_legal_moves():
             v = max(v, self.min_value(game.forecast_move(m), depth - 1, player))
-        
-        # If the transposition table contains this entry,
-        # update the value only when current depth is greater than
-        # the existing one stored.
-        # If the transposition table does not contain this entry,
-        # add this entry and value
-        if (stored_v and stored_v[0] < depth) or (not stored_v):
-            self.transposition_table[game.hash()] = (depth, v)
         
         return v
 
