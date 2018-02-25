@@ -41,16 +41,29 @@ def custom_score(game, player):
 
     if game.is_winner(player):
         return float("inf")
-
+    
     y1, x1 = game.get_player_location(player)
     y2, x2 = game.get_player_location(game.get_opponent(player))
-    distance = math.sqrt((y2 - y1)**2 + (x2 - x1)**2)
-    distance_offset = math.sqrt(2**2 + 1**2)
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - abs(distance - distance_offset)*opp_moves)
+    y2_mirror, x2_mirror = game.height - y2 - 1, game.width - x2 - 1
+    distance = math.sqrt((y2_mirror - y1)**2 + (x2_mirror - x1)**2)
 
+    #own_moves = len(game.get_legal_moves(player))
+    #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    #return float(own_moves - distance - opp_moves)
 
+    own_moves = game.get_legal_moves(player)
+    opp_moves = game.get_legal_moves(game.get_opponent(player))
+    own_moves_num = len(own_moves)
+    opp_moves_num = len(opp_moves)
+    blank_space_num = len(game.get_blank_spaces())
+    distance_weight = blank_space_num / (game.height * game.width)
+
+    #if set(own_moves) & set(opp_moves):
+    #    own_moves_num = own_moves_num - 1 if game.active_player != player else own_moves_num
+    
+    return float(own_moves_num - opp_moves_num - distance_weight * distance)
+
+    
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -79,14 +92,27 @@ def custom_score_2(game, player):
 
     if game.is_winner(player):
         return float("inf")
-    
+
     y1, x1 = game.get_player_location(player)
     y2, x2 = game.get_player_location(game.get_opponent(player))
-    y2_mirror, x2_mirror = game.height - y2 - 1, game.width - x2 - 1
-    distance = math.sqrt((y2_mirror - y1)**2 + (x2_mirror - x1)**2)
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - distance - opp_moves)
+    distance = math.sqrt((y2 - y1)**2 + (x2 - x1)**2)
+    distance_offset = math.sqrt(2**2 + 1**2)
+
+    #own_moves = len(game.get_legal_moves(player))
+    #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    #return float(own_moves - opp_moves - abs(distance - distance_offset))
+
+    own_moves = game.get_legal_moves(player)
+    opp_moves = game.get_legal_moves(game.get_opponent(player))
+    own_moves_num = len(own_moves)
+    opp_moves_num = len(opp_moves)
+    blank_space_num = len(game.get_blank_spaces())
+    distance_weight = blank_space_num / (game.height * game.width)
+
+    #if set(own_moves) & set(opp_moves):
+    #    own_moves_num = own_moves_num - 1 if game.active_player != player else own_moves_num
+
+    return float(own_moves_num - opp_moves_num - distance_weight * abs(distance - distance_offset))
 
 
 def custom_score_3(game, player):
@@ -120,10 +146,11 @@ def custom_score_3(game, player):
     
     own_moves = game.get_legal_moves(player)
     opp_moves = game.get_legal_moves(game.get_opponent(player))
+
     own_moves_num = len(own_moves)
     opp_moves_num = len(opp_moves)
-    if game.active_player != player:
-        own_moves_num -= len(set(own_moves) & set(opp_moves))
+    if set(own_moves) & set(opp_moves):
+        own_moves_num = own_moves_num - 1 if game.active_player != player else own_moves_num
     
     return float(own_moves_num - opp_moves_num)
 
