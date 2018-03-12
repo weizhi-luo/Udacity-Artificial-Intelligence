@@ -87,7 +87,49 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from game import Directions
+    from collections import namedtuple
+    node = namedtuple('node', ['state', 'action', 'cost', 'parent'])
+    
+    start_state = problem.getStartState()
+    
+    if problem.isGoalState(problem.getSuccessors(start_state)):
+        return [Directions.STOP]
+    
+    explored_state = set()
+    frontier = util.Stack()
+    
+    start_node = node(state=start_state, action=None, cost=None, parent=None)
+    
+    explored_state.add(start_state)
+    _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=start_node)) \
+         for successor in reversed(problem.getSuccessors(start_state))]
+#    _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=start_node)) \
+#         for successor in problem.getSuccessors(start_state)]
+    
+    while True:
+        if frontier.isEmpty():
+            return
+        
+        pop_node = frontier.pop()
+        if problem.isGoalState(pop_node.state):
+            actions = [pop_node.action]
+            parent_node = pop_node.parent
+            while parent_node != start_node:
+                actions.append(parent_node.action)
+                parent_node = parent_node.parent
+            return [Directions.EAST if Directions.EAST == action else \
+                    Directions.SOUTH if Directions.SOUTH == action else \
+                    Directions.WEST if Directions.WEST == action else \
+                    Directions.NORTH if Directions.NORTH == action else \
+                    Directions.STOP if Directions.STOP == action else None \
+                    for action in reversed(actions)]
+        else:
+            explored_state.add(pop_node.state)
+            _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=pop_node)) \
+                 for successor in reversed(problem.getSuccessors(pop_node.state)) if successor[0] not in explored_state]
+#            _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=pop_node)) \
+#                 for successor in problem.getSuccessors(pop_node.state) if successor[0] not in explored_state]
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
