@@ -112,6 +112,7 @@ def depthFirstSearch(problem):
             return
         
         pop_node = frontier.pop()
+        
         if problem.isGoalState(pop_node.state):
             actions = [pop_node.action]
             parent_node = pop_node.parent
@@ -124,12 +125,12 @@ def depthFirstSearch(problem):
                     Directions.NORTH if Directions.NORTH == action else \
                     Directions.STOP if Directions.STOP == action else None \
                     for action in reversed(actions)]
-        else:
-            explored_state.add(pop_node.state)
-            _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=pop_node)) \
-                 for successor in reversed(problem.getSuccessors(pop_node.state)) if successor[0] not in explored_state]
-#            _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=pop_node)) \
-#                 for successor in problem.getSuccessors(pop_node.state) if successor[0] not in explored_state]
+
+        explored_state.add(pop_node.state)
+        _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=pop_node)) \
+             for successor in reversed(problem.getSuccessors(pop_node.state)) if successor[0] not in explored_state]
+#        _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=pop_node)) \
+#             for successor in problem.getSuccessors(pop_node.state) if successor[0] not in explored_state]
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
