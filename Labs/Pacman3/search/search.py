@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+from game import Directions
 
 class SearchProblem:
     """
@@ -61,7 +62,18 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
-
+class Node:
+    
+    def __init__(self, state, action, cost, parent_node):
+        self.state = state
+        self.cost = cost
+        self.parent_node = parent_node
+        self.action = Directions.EAST if Directions.EAST == action else \
+                      Directions.SOUTH if Directions.SOUTH == action else \
+                      Directions.WEST if Directions.WEST == action else \
+                      Directions.NORTH if Directions.NORTH == action else \
+                      Directions.STOP if Directions.STOP == action else None
+        
 def tinyMazeSearch(problem):
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -87,10 +99,6 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    from game import Directions
-    from collections import namedtuple
-    node = namedtuple('node', ['state', 'action', 'cost', 'parent'])
-    
     start_state = problem.getStartState()
     
     if problem.isGoalState(problem.getSuccessors(start_state)):
@@ -99,44 +107,64 @@ def depthFirstSearch(problem):
     explored_state = set()
     frontier = util.Stack()
     
-    start_node = node(state=start_state, action=None, cost=None, parent=None)
-    
-    explored_state.add(start_state)
-    _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=start_node)) \
-         for successor in reversed(problem.getSuccessors(start_state))]
-#    _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=start_node)) \
-#         for successor in problem.getSuccessors(start_state)]
+    start_node = Node(start_state, None, None, None)
+    frontier.push(start_node)
     
     while True:
         if frontier.isEmpty():
             return
         
         pop_node = frontier.pop()
-        
-        if problem.isGoalState(pop_node.state):
-            actions = [pop_node.action]
-            parent_node = pop_node.parent
-            while parent_node != start_node:
-                actions.append(parent_node.action)
-                parent_node = parent_node.parent
-            return [Directions.EAST if Directions.EAST == action else \
-                    Directions.SOUTH if Directions.SOUTH == action else \
-                    Directions.WEST if Directions.WEST == action else \
-                    Directions.NORTH if Directions.NORTH == action else \
-                    Directions.STOP if Directions.STOP == action else None \
-                    for action in reversed(actions)]
-
         explored_state.add(pop_node.state)
-        _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=pop_node)) \
-             for successor in reversed(problem.getSuccessors(pop_node.state)) if successor[0] not in explored_state]
-#        _ = [frontier.push(node(state=successor[0], action=successor[1], cost=successor[2], parent=pop_node)) \
-#             for successor in problem.getSuccessors(pop_node.state) if successor[0] not in explored_state]
-
+        
+        for successor in problem.getSuccessors(pop_node.state):
+        #for successor in reversed(problem.getSuccessors(pop_node.state)):
+            child = Node(successor[0], successor[1], successor[2], pop_node)
+            
+            if (child.state not in explored_state) and (child.state not in frontier.list):
+                if problem.isGoalState(child.state):
+                    actions = [child.action]
+                    parent = child.parent_node
+                    while parent != start_node:
+                        actions.append(parent.action)
+                        parent = parent.parent_node
+                    return list(reversed(actions))
+                frontier.push(child)
+                
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    start_state = problem.getStartState()
+    
+    if problem.isGoalState(problem.getSuccessors(start_state)):
+        return [Directions.STOP]
+    
+    explored_state = set()
+    frontier = util.Queue()
+    
+    start_node = Node(start_state, None, None, None)
+    frontier.push(start_node)
+    
+    while True:
+        if frontier.isEmpty():
+            return
+        
+        pop_node = frontier.pop()
+        explored_state.add(pop_node.state)
+        
+        for successor in problem.getSuccessors(pop_node.state):
+            child = Node(successor[0], successor[1], successor[2], pop_node)
+            
+            if (child.state not in explored_state) and (child.state not in frontier.list):
+                if problem.isGoalState(child.state):
+                    actions = [child.action]
+                    parent = child.parent_node
+                    while parent != start_node:
+                        actions.append(parent.action)
+                        parent = parent.parent_node
+                    return list(reversed(actions))
+                frontier.push(child)
+                
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
