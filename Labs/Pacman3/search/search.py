@@ -121,7 +121,7 @@ def depthFirstSearch(problem):
         #for successor in reversed(problem.getSuccessors(pop_node.state)):
             child = Node(successor[0], successor[1], successor[2], pop_node)
             
-            if (child.state not in explored_state) and (child.state not in frontier.list):
+            if child.state not in explored_state:
                 if problem.isGoalState(child.state):
                     actions = [child.action]
                     parent = child.parent_node
