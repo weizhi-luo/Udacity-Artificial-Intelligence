@@ -101,7 +101,7 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     start_state = problem.getStartState()
     
-    if problem.isGoalState(problem.getSuccessors(start_state)):
+    if problem.isGoalState(start_state):
         return [Directions.STOP]
     
     explored_state = set()
@@ -135,8 +135,8 @@ def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     start_state = problem.getStartState()
-    
-    if problem.isGoalState(problem.getSuccessors(start_state)):
+
+    if problem.isGoalState(start_state):
         return [Directions.STOP]
     
     explored_state = set()
@@ -180,8 +180,59 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state = problem.getStartState()
+    if problem.isGoalState(start_state):
+        return [Directions.STOP]
+    
+    explored_state = set()
+    frontier = util.PriorityQueue()
+    state_g_score = dict()
+    state_f_score = dict()
+    state_parent_state = dict()
 
+    state_g_score[start_state] = 0
+    state_f_score[start_state] = heuristic(start_state, problem)
+    state_parent_state[start_state] = None
+    frontier.push(start_state, state_f_score[start_state])
+    
+    while True:
+        if frontier.isEmpty():
+            return
+        
+        pop_state = frontier.pop()
+        if problem.isGoalState(pop_state):
+            parent_state = state_parent_state[pop_state]
+            actions = []
+            path_state = pop_state
+            while parent_state:
+                if parent_state[0] - path_state[0] > 0:
+                    actions.append(Directions.WEST)
+                elif parent_state[0] - path_state[0] < 0:
+                    actions.append(Directions.EAST)
+                elif parent_state[1] - path_state[1] > 0:
+                    actions.append(Directions.SOUTH)
+                elif parent_state[1] - path_state[1] < 0:
+                    actions.append(Directions.NORTH)
+                path_state = parent_state
+                parent_state = state_parent_state[path_state]
+            return list(reversed(actions))
+        
+        explored_state.add(pop_state)
+        
+        for successor in problem.getSuccessors(pop_state):
+            successor_state = successor[0]
+            successor_cost = successor[2]
+            if successor_state in explored_state:
+                continue
+
+            if (successor_state not in state_g_score) or ((state_g_score[pop_state] + successor_cost) < state_g_score[successor_state]):
+                state_g_score[successor_state] = state_g_score[pop_state] + successor_cost
+                state_f_score[successor_state] = state_g_score[successor_state] + heuristic(successor_state, problem)
+                state_parent_state[successor_state] = pop_state
+                if successor_state not in state_g_score:
+                    frontier.push(successor_state, state_f_score[successor_state])
+                else:
+                    frontier.update(successor_state, state_f_score[successor_state])
 
 # Abbreviations
 bfs = breadthFirstSearch
