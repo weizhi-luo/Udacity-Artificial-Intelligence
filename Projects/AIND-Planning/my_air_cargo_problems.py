@@ -131,8 +131,22 @@ class AirCargoProblem(Problem):
         possible_actions = []
         kb = PropKB()
         kb.tell(decode_state(state, self.state_map).pos_sentence())
-        for action in self.get_actions():
-            if action.check_precond(kb, action.args):
+        for action in self.actions_list:
+            is_possible = True
+            for clause in action.precond_pos:
+                if clause not in kb.clauses:
+                    is_possible = False
+                    # action is not possible, break from the loop
+                    break
+            if not is_possible:
+                # action is not possible, skip the run and check another action instead
+                continue
+            for clause in action.precond_neg:
+                if clause in kb.clauses:
+                    is_possible = False
+                    # action is not possbile, break from the loop
+                    break
+            if is_possible:
                 possible_actions.append(action)
         return possible_actions
 
@@ -147,13 +161,18 @@ class AirCargoProblem(Problem):
         """
         # TODO implement
         new_state = FluentState([], [])
-        kb = PropKB()
-        kb.tell(decode_state(state, self.state_map).pos_sentence())
-        action.act(kb, action.args);
-        for s in self.state_map:
-            if kb.ask_if_true(s):
+        old_state = decode_state(state, self.state_map)
+        for s in old_state.pos:
+            if s not in action.effect_rem:
                 new_state.pos.append(s)
-            else:
+        for s in action.effect_add:
+            if s not in new_state.pos:
+                new_state.pos.append(s)
+        for s in old_state.neg:
+            if s not in action.effect_add:
+                new_state.neg.append(s)
+        for s in action.effect_rem:
+            if s not in new_state.neg:
                 new_state.neg.append(s)
         return encode_state(new_state, self.state_map)
 
