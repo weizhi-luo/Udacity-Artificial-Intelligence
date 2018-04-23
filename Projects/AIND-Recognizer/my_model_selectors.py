@@ -77,7 +77,27 @@ class SelectorBIC(ModelSelector):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # TODO implement model selection based on BIC scores
-        raise NotImplementedError
+        min_bic = float('inf')
+        best_num_components = 0
+
+        for num_components in range(self.min_n_components, self.max_n_components + 1):
+            model = self.base_model(num_components)
+            if not model:
+                continue
+            
+            try:
+                log_likelihood = model.score(self.X, self.lengths)
+                num_data_points = len(self.X)
+                num_parameters = num_components * num_components - 1 + 2 * num_components * num_data_points
+
+                bic = -2 * log_likelihood + num_parameters * np.log(num_data_points)
+                if (bic < min_bic):
+                    min_bic = bic
+                    best_num_components = num_components
+            except:
+                pass
+            
+        return self.base_model(best_num_components)
 
 
 class SelectorDIC(ModelSelector):
@@ -94,7 +114,34 @@ class SelectorDIC(ModelSelector):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # TODO implement model selection based on DIC scores
-        raise NotImplementedError
+        max_dic = float('-inf')
+        best_num_components = 0
+
+        for num_components in range(self.min_n_components, self.max_n_components + 1):
+            model = self.base_model(num_components)
+            if not model:
+                continue
+            
+            try:
+                log_likelihood = model.score(self.X, self.lengths)
+                
+                num_words = 0
+                sum_log_likelihood = 0.0
+                for word, (word_X, word_lengths) in self.hwords.items():
+                    if word == self.this_word:
+                        continue
+                    
+                    sum_log_likelihood += model.score(word_X, word_lengths)
+                    num_words += 1
+                
+                dic = log_likelihood - (1.0 / num_words) * sum_log_likelihood
+                if dic > max_dic:
+                    max_dic = dic
+                    best_num_components = num_components 
+            except:
+                pass
+
+        return self.base_model(best_num_components)
 
 
 class SelectorCV(ModelSelector):
@@ -106,4 +153,34 @@ class SelectorCV(ModelSelector):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # TODO implement model selection using CV
-        raise NotImplementedError
+        max_log_likelihood = float('-inf')
+        best_num_components = 0
+        split_method = KFold(n_splits=min(3, len(self.sequences))) if len(self.sequences) > 1 else None
+        
+        for num_components in range(self.min_n_components, self.max_n_components + 1):
+            sum_log_likelihood = 0.0
+            num_run = 0
+
+            split_idx = split_method.split(self.sequences) if split_method is not None else [([0],[0])]
+
+            for train_idx, test_idx in split_idx:
+                train_X, train_lengths = combine_sequences(train_idx, self.sequences)
+                test_X, test_lengths = combine_sequences(test_idx, self.sequences)
+
+                try:
+                    model = GaussianHMM(n_components=num_components, n_iter=1000).fit(train_X, train_lengths)
+                    log_likelihood = model.score(test_X, test_lengths)
+                    sum_log_likelihood += log_likelihood
+                    num_run += 1
+                except:
+                    pass
+
+            if num_run == 0:
+                continue
+
+            avg_log_likelihood = sum_log_likelihood / num_run
+            if avg_log_likelihood > max_log_likelihood:
+                max_log_likelihood = avg_log_likelihood
+                best_num_components = num_components
+        
+        return self.base_model(best_num_components)
