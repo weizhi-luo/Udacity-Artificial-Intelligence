@@ -13600,6 +13600,61 @@ Percentage of human faces detected in dog_files_short: 11%
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>It is not appropriate to use the face detector from OpenCV as a way to detect human images.</p>
+<p>Here is a photo of human that the face detector failed to detect:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img style="float:left" src="lfw\Muhammad_Ali\Muhammad_Ali_0001.jpg"></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here is another photo of dog that the face detector detects a human face:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img style="float:left" src="dogImages/train\095.Kuvasz\Kuvasz_06442.jpg"></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is because OpenCV face detector relies on extracting and calculating Haar features from each image. The relevant features, such as the region of the eyes is usually darker than the area of nose and cheeks, the eyes are darker than the bridge of the nodes [1].</p>
+<p>When the human photo above just vaguely shows the right eye, the face detector fails to detect the eyes region related feature so that it fails to detect the face.</p>
+<p>Similarly, the dog photo above resembles the important features for human face detection so that the face detector reports that it detects a face.</p>
+<p>Therefore, OpenCV face detector is not appropriate to be used as a way to detect human images.</p>
+<p>[1] <a href="https://www.superdatascience.com/opencv-face-detection">https://www.superdatascience.com/opencv-face-detection</a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <hr>
 <p><a id='step2'></a></p>
 <h2 id="Step-2:-Detect-Dogs">Step 2: Detect Dogs<a class="anchor-link" href="#Step-2:-Detect-Dogs">&#182;</a></h2><p>In this section, we use a pre-trained <a href="http://ethereon.github.io/netscope/#/gist/db945b393d40bfa26006">ResNet-50</a> model to detect dogs in images.  Our first line of code downloads the ResNet-50 model, along with weights that have been trained on <a href="http://www.image-net.org/">ImageNet</a>, a very large, very popular dataset used for image classification and other vision tasks.  ImageNet contains over 10 million URLs, each linking to an image containing an object from one of <a href="https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a">1000 categories</a>.  Given an image, this pre-trained ResNet-50 model returns a prediction (derived from the available categories in ImageNet) for the object that is contained in the image.</p>
@@ -14800,6 +14855,8 @@ Epoch 4/5
 <span class="n">grid_result</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_InceptionV3</span><span class="p">,</span> <span class="n">train_targets</span><span class="p">)</span>
 </pre></div>
 <p>The result showed that the combination of Adagrad optmization function and batch size of 20 had the best performance.</p>
+<h5 id="Why-this-structure?">Why this structure?<a class="anchor-link" href="#Why-this-structure?">&#182;</a></h5><p>Comparing to the structure in "Step 3: Create a CNN to Classify Dog Breeds (from Scratch)", this structure presents similarity in the fully connected and output layers. However, by implementing transfer learning, this structure utilizes the state-of-the-arts convolutional layers structure of InceptionV3 to extract much more and better features from different dog breeds. This features help the fully connected and output layers classify dog breeds with much higer accuracy.</p>
+<p>Comparing to the structure in "Step 4: Use a CNN to Classify Dog Breeds", this structure has added 1 hidden layer and 1 dropout layer. As using a different convolutional layers structure which produces different features, the tests showed that the simple structure in Step 4 became overfitting very quickly. By adding the hidden and dropout layers, overfitting was supressed and generalization error was minimized.</p>
 
 </div>
 </div>
@@ -15072,10 +15129,10 @@ Epoch 15/15
     <span class="n">is_dog</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">img</span><span class="o">=</span><span class="n">mpimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
     
-    <span class="k">if</span> <span class="n">face_detector</span><span class="p">(</span><span class="n">img_path</span><span class="p">):</span>
-        <span class="n">is_human</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">elif</span> <span class="n">dog_detector</span><span class="p">(</span><span class="n">img_path</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">dog_detector</span><span class="p">(</span><span class="n">img_path</span><span class="p">):</span>
         <span class="n">is_dog</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">face_detector</span><span class="p">(</span><span class="n">img_path</span><span class="p">):</span>
+        <span class="n">is_human</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">neither</span> <span class="o">=</span> <span class="kc">True</span>
         
@@ -31079,6 +31136,20 @@ kwJ1AAAAAElFTkSuQmCC
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The results were better than I expected. However, with this current implementation, the algorithm could present bad results. Ways to improve:</p>
+<h5 id="Use-a-better-way-to-detect-dog:">Use a better way to detect dog:<a class="anchor-link" href="#Use-a-better-way-to-detect-dog:">&#182;</a></h5><p>If the input is a photo of dog, the current dog detector algorithm return 100% accuracy. However, if the input is a photo of human, there is a 2% chance that the detector returns it is a dog. A better dog detector algorithm shall make the results better.</p>
+<h5 id="Use-a-better-way-to-detect-human:">Use a better way to detect human:<a class="anchor-link" href="#Use-a-better-way-to-detect-human:">&#182;</a></h5><p>If the input is a photo of human, the success rate for current face detector to detect is 98%. If the input is a photo of dog, there is still a 11% chance that the detector dectects a face from it. These results show that it is not very appropriate to use face detector as a means to detect human. A better algorithm is required.</p>
+<h5 id="Use-localization-to-help-capture-the-features:">Use localization to help capture the features:<a class="anchor-link" href="#Use-localization-to-help-capture-the-features:">&#182;</a></h5><p>Discrimitive localization presented in [1] might be able to help improving the results as well. Localizatin might be used to locate the object before feeding into the algorithm so that other unrelated objects can be filtered out and the image noises can be reduced.</p>
+<p>[1] <a href="http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf">http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf</a></p>
+
+</div>
+</div>
 </div>
     </div>
   </div>
